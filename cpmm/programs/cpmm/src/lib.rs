@@ -169,6 +169,86 @@ pub mod cpmm {
 
         Ok(())
     }
+
+    pub fn swap(
+        ctx: Context<Swap>,
+        amount_in: u64,
+        a_to_b: bool,
+    ) -> Result<()> {
+        let reserve_a = ctx.accounts.vault_a.amount;
+        let reserve_b = ctx.accounts.vault_b.amount;
+        
+        let (reserve_in, reserve_out) = if a_to_b {
+            (reserve_a, reserve_b)
+        } else {
+            (reserve_b, reserve_a)
+        };
+
+        let amount_out = amount_in
+            .checked_mul(reserve_out).unwrap()
+            .checked_div(reserve_in.checked_add(amount_in).unwrap()).unwrap();
+
+        let pool_key = ctx.accounts.pool.key();
+        let seeds = &[
+            b"authority",
+            pool_key.as_ref(),
+            &[ctx.accounts.pool.pool_authority_bump],
+        ];
+        let signer_seeds = &[&seeds[..]];
+
+        if a_to_b {
+            token::transfer(
+                CpiContext::new(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer {
+                        from: ctx.accounts.user_token_a.to_account_info(),
+                        to: ctx.accounts.vault_a.to_account_info(),
+                        authority: ctx.accounts.user.to_account_info(),
+                    },
+                ),
+                amount_in,
+            )?;
+
+            token::transfer(
+                CpiContext::new_with_signer(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer {
+                        from: ctx.accounts.vault_b.to_account_info(),
+                        to: ctx.accounts.user_token_b.to_account_info(),
+                        authority: ctx.accounts.pool_authority.to_account_info(),
+                    },
+                    signer_seeds,
+                ),
+                amount_out,
+            )?;
+        } else {
+            token::transfer(
+                CpiContext::new(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer {
+                        from: ctx.accounts.user_token_b.to_account_info(),
+                        to: ctx.accounts.vault_b.to_account_info(),
+                        authority: ctx.accounts.user.to_account_info(),
+                    },
+                ),
+                amount_in,
+            )?;
+            token::transfer(
+                CpiContext::new_with_signer(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer {
+                        from: ctx.accounts.vault_a.to_account_info(),
+                        to: ctx.accounts.user_token_a.to_account_info(),
+                        authority: ctx.accounts.pool_authority.to_account_info(),
+                    },
+                    signer_seeds,
+                ),
+                amount_out,
+            )?;
+        }
+
+        Ok(())
+    }
 }
 
 #[account]
@@ -298,6 +378,36 @@ pub struct RemoveLiquidity<'info> {
 
     #[account(mut)]
     pub user_lp_account: Account<'info, TokenAccount>,
+
+    pub user: Signer<'info>,
+
+    pub token_program: Program<'info, Token>,
+}
+
+
+#[derive(Accounts)]
+pub struct Swap<'info> {
+    #[account(mut)]
+    pub pool: Account<'info, Pool>,
+
+    /// CHECK: PDA authority for the pool
+    #[account(
+        seeds = [b"authority", pool.key().as_ref()],
+        bump = pool.pool_authority_bump,
+    )]
+    pub pool_authority: AccountInfo<'info>,
+
+    #[account(mut)]
+    pub user_token_a: Account<'info, TokenAccount>,
+
+    #[account(mut)]
+    pub user_token_b: Account<'info, TokenAccount>,
+
+    #[account(mut)]
+    pub vault_a: Account<'info, TokenAccount>,
+
+    #[account(mut)]
+    pub vault_b: Account<'info, TokenAccount>,
 
     pub user: Signer<'info>,
 
