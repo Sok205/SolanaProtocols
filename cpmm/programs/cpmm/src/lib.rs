@@ -4,7 +4,7 @@ use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer, MintTo, Burn}
 declare_id!("9ksBfnBknijV8Tz5ejGPL8gJUSAFfody2UoueaLHmnw8");
 
 // Integer square root using Babylonian method
-fn integer_sqrt(n: u64) -> u64 {
+fn integer_sqrt_u128(n: u128) -> u64 {
     if n == 0 {
         return 0;
     }
@@ -14,7 +14,7 @@ fn integer_sqrt(n: u64) -> u64 {
         x = y;
         y = (x + n / x) / 2;
     }
-    x
+    x as u64
 }
 
 #[program]
@@ -46,15 +46,14 @@ pub mod cpmm {
         let lp_supply = ctx.accounts.lp_mint.supply;
 
         let lp_to_mint = if lp_supply == 0 {
-            integer_sqrt(amount_a.checked_mul(amount_b).unwrap())
+            integer_sqrt_u128((amount_a as u128).checked_mul(amount_b as u128).unwrap())
         } else {
-
-            let lp_for_a = amount_a
-                .checked_mul(lp_supply).unwrap()
-                .checked_div(reserve_a).unwrap();
-            let lp_for_b = amount_b
-                .checked_mul(lp_supply).unwrap()
-                .checked_div(reserve_b).unwrap();
+            let lp_for_a = (amount_a as u128)
+                .checked_mul(lp_supply as u128).unwrap()
+                .checked_div(reserve_a as u128).unwrap() as u64;
+            let lp_for_b = (amount_b as u128)
+                .checked_mul(lp_supply as u128).unwrap()
+                .checked_div(reserve_b as u128).unwrap() as u64;
             std::cmp::min(lp_for_a, lp_for_b)
         };
 
@@ -114,12 +113,12 @@ pub mod cpmm {
         let reserve_b = ctx.accounts.vault_b.amount;
         let lp_supply = ctx.accounts.lp_mint.supply;
         
-        let amount_a = lp_amount
-            .checked_mul(reserve_a).unwrap()
-            .checked_div(lp_supply).unwrap();
-        let amount_b = lp_amount
-            .checked_mul(reserve_b).unwrap()
-            .checked_div(lp_supply).unwrap();
+        let amount_a = (lp_amount as u128)
+            .checked_mul(reserve_a as u128).unwrap()
+            .checked_div(lp_supply as u128).unwrap() as u64;
+        let amount_b = (lp_amount as u128)
+            .checked_mul(reserve_b as u128).unwrap()
+            .checked_div(lp_supply as u128).unwrap() as u64;
 
         let pool_key = ctx.accounts.pool.key();
         let seeds = &[
@@ -184,9 +183,9 @@ pub mod cpmm {
             (reserve_b, reserve_a)
         };
 
-        let amount_out = amount_in
-            .checked_mul(reserve_out).unwrap()
-            .checked_div(reserve_in.checked_add(amount_in).unwrap()).unwrap();
+        let amount_out = (amount_in as u128)
+            .checked_mul(reserve_out as u128).unwrap()
+            .checked_div((reserve_in as u128).checked_add(amount_in as u128).unwrap()).unwrap() as u64;
 
         let pool_key = ctx.accounts.pool.key();
         let seeds = &[
