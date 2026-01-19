@@ -1,7 +1,6 @@
-// src/components/shared/TokenInput.tsx
 "use client";
 
-import { ChangeEvent } from "react";
+import { ChangeEvent, useRef, useEffect, useState } from "react";
 
 interface TokenInputProps {
   label: string;
@@ -20,6 +19,9 @@ export function TokenInput({
   balance,
   disabled = false,
 }: TokenInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isFocused, setIsFocused] = useState(false);
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     if (val === "" || /^\d*\.?\d*$/.test(val)) {
@@ -27,29 +29,46 @@ export function TokenInput({
     }
   };
 
+  const handleContainerClick = () => {
+    inputRef.current?.focus();
+  };
+
   return (
-    <div className="bg-gray-900 rounded-lg p-4">
-      <div className="flex justify-between items-center mb-2">
-        <label className="text-sm text-gray-400">{label}</label>
-        {balance && (
-          <span className="text-xs text-gray-500">
-            Balance: {balance} {symbol}
-          </span>
-        )}
-      </div>
-      <div className="flex items-center gap-3">
-        <input
-          type="text"
-          inputMode="decimal"
-          value={value}
-          onChange={handleChange}
-          disabled={disabled}
-          placeholder="0.0"
-          className="flex-1 bg-transparent text-2xl font-mono outline-none disabled:text-gray-500"
-        />
-        {symbol && (
-          <span className="text-lg font-medium text-gray-300">{symbol}</span>
-        )}
+    <div
+      className={`py-2 cursor-text ${disabled ? "opacity-50" : ""}`}
+      onClick={handleContainerClick}
+    >
+      {/* Balance display */}
+      {balance && (
+        <div className="text-terminal-muted text-xs mb-1 pl-2">
+          // balance: {balance} {symbol}
+        </div>
+      )}
+
+      {/* Prompt line */}
+      <div className="flex items-center gap-2">
+        <span className="text-terminal-muted">&gt;</span>
+        <span className="text-terminal uppercase">{label}:</span>
+        <div className="flex-1 flex items-center">
+          <input
+            ref={inputRef}
+            type="text"
+            inputMode="decimal"
+            value={value}
+            onChange={handleChange}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            disabled={disabled}
+            placeholder="0"
+            className="flex-1 bg-transparent text-terminal glow outline-none disabled:text-terminal-muted min-w-0"
+          />
+          {isFocused && (
+            <span className="w-2 h-5 bg-terminal animate-blink ml-0.5" />
+          )}
+          {symbol && (
+            <span className="text-terminal-muted ml-2">{symbol}</span>
+          )}
+        </div>
       </div>
     </div>
   );

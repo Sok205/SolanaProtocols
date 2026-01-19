@@ -1,7 +1,4 @@
-// src/components/shared/FormulaBreakdown.tsx
 "use client";
-
-import { MathDisplay } from "./MathDisplay";
 
 export interface FormulaStep {
   label: string;
@@ -17,22 +14,27 @@ interface FormulaBreakdownProps {
 
 export function FormulaBreakdown({ title, steps }: FormulaBreakdownProps) {
   return (
-    <div className="bg-gray-900 rounded-lg p-4 space-y-3">
-      <h4 className="text-sm font-medium text-gray-400">{title}</h4>
+    <div className="border border-terminal p-3 space-y-2">
+      <div className="text-terminal-muted text-xs uppercase">
+        // {title}
+      </div>
+      <div className="text-terminal-muted text-xs">
+        // ────────────────────────────────
+      </div>
       {steps.map((step, i) => (
         <div
           key={i}
-          className={
-            step.highlight
-              ? "bg-purple-900/30 -mx-2 px-2 py-1 rounded"
-              : ""
-          }
+          className={`text-sm ${step.highlight ? "text-terminal glow" : "text-terminal-muted"}`}
         >
-          <span className="text-gray-500 text-sm">{step.label}:</span>
-          <div className="flex items-center gap-3 mt-1">
-            <MathDisplay formula={step.formula} />
+          <span className="text-terminal-muted">// {step.label.toLowerCase()}:</span>
+          <div className="pl-3 mt-0.5">
+            <span className={step.highlight ? "text-terminal glow" : "text-terminal"}>
+              {step.formula}
+            </span>
             {step.value && (
-              <span className="text-green-400 font-mono">= {step.value}</span>
+              <span className="text-terminal glow ml-2">
+                = {step.value}
+              </span>
             )}
           </div>
         </div>

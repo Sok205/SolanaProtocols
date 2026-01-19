@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import BN from "bn.js";
-import { TokenInput, FormulaBreakdown, FormulaStep } from "@/components/shared";
+import { TokenInput, FormulaBreakdown, FormulaStep, TerminalButton, StatusIndicator } from "@/components/shared";
 import { KValueMonitor } from "./KValueMonitor";
 import { calculateSwapOutput, calculatePriceImpact, parseTokenAmount, formatTokenAmount } from "../lib/math";
 import { PoolData } from "../lib/client";
@@ -12,9 +12,11 @@ interface Props {
   onSwap: (amountIn: BN, aToB: boolean) => Promise<void>;
   symbolA?: string;
   symbolB?: string;
+  balanceA?: string;
+  balanceB?: string;
 }
 
-export function SwapPanel({ pool, onSwap, symbolA = "A", symbolB = "B" }: Props) {
+export function SwapPanel({ pool, onSwap, symbolA = "A", symbolB = "B", balanceA, balanceB }: Props) {
   const [amountIn, setAmountIn] = useState("");
   const [aToB, setAToB] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -22,6 +24,7 @@ export function SwapPanel({ pool, onSwap, symbolA = "A", symbolB = "B" }: Props)
   const { reserveA, reserveB } = pool;
   const [reserveIn, reserveOut] = aToB ? [reserveA, reserveB] : [reserveB, reserveA];
   const [symbolIn, symbolOut] = aToB ? [symbolA, symbolB] : [symbolB, symbolA];
+  const balanceIn = aToB ? balanceA : balanceB;
 
   const calculation = useMemo(() => {
     if (!amountIn || parseFloat(amountIn) === 0) return null;
@@ -40,14 +43,14 @@ export function SwapPanel({ pool, onSwap, symbolA = "A", symbolB = "B" }: Props)
     const steps: FormulaStep[] = [
       {
         label: "Formula",
-        formula: "\\text{out} = \\frac{\\text{in} \\times R_{out}}{R_{in} + \\text{in}}"
+        formula: "out = (in × R_out) / (R_in + in)"
       },
       {
         label: "Values",
-        formula: `\\frac{${amountIn} \\times ${formatTokenAmount(reserveOut)}}{${formatTokenAmount(reserveIn)} + ${amountIn}}`
+        formula: `(${amountIn} × ${formatTokenAmount(reserveOut)}) / (${formatTokenAmount(reserveIn)} + ${amountIn})`
       },
       {
-        label: "Output",
+        label: "Result",
         formula: formatTokenAmount(output),
         value: `${formatTokenAmount(output)} ${symbolOut}`,
         highlight: true
@@ -76,48 +79,63 @@ export function SwapPanel({ pool, onSwap, symbolA = "A", symbolB = "B" }: Props)
 
   return (
     <div className="space-y-4">
+      {/* Direction indicator */}
+      <div className="text-terminal-muted text-xs">
+        // swap direction: {symbolIn} → {symbolOut}
+      </div>
+
+      {/* Input */}
       <TokenInput
-        label={`You pay (${symbolIn})`}
+        label={`FROM (${symbolIn})`}
         value={amountIn}
         onChange={setAmountIn}
         symbol={symbolIn}
+        balance={balanceIn}
       />
 
+      {/* Flip button */}
       <button
         onClick={handleFlip}
-        className="w-full py-2 text-gray-400 hover:text-white transition-colors"
+        className="w-full py-2 text-terminal-muted hover:text-terminal transition-colors text-sm border border-terminal-muted hover:border-terminal"
       >
-        ↕ Flip direction
+        [ ↕ FLIP DIRECTION ]
       </button>
 
-      <div className="bg-gray-900 rounded-lg p-4">
-        <span className="text-sm text-gray-400">You receive ({symbolOut})</span>
-        <div className="text-2xl font-mono mt-1">
+      {/* Output display */}
+      <div className="border border-terminal p-3">
+        <div className="text-terminal-muted text-xs mb-1">&gt; TO ({symbolOut}):</div>
+        <div className="text-xl text-terminal glow">
           {calculation ? formatTokenAmount(calculation.output) : "0.0"} {symbolOut}
         </div>
       </div>
 
+      {/* Calculation details */}
       {calculation && (
-        <>
-          <FormulaBreakdown title="Swap Calculation" steps={calculation.steps} />
+        <div className="space-y-3">
+          <FormulaBreakdown title="SWAP CALCULATION" steps={calculation.steps} />
 
           <KValueMonitor kBefore={calculation.kBefore} kAfter={calculation.kAfter} />
 
           {calculation.priceImpact > 1 && (
-            <div className="bg-yellow-900/20 text-yellow-400 rounded-lg p-3 text-sm">
-              Price impact: {calculation.priceImpact.toFixed(2)}%
+            <div className="border border-terminal-amber p-3 flex items-center justify-between">
+              <span className="text-terminal-amber">PRICE_IMPACT:</span>
+              <span className="text-terminal-amber glow-amber">
+                {calculation.priceImpact.toFixed(2)}% <StatusIndicator status="info" />
+              </span>
             </div>
           )}
-        </>
+        </div>
       )}
 
-      <button
+      {/* Execute button */}
+      <TerminalButton
         onClick={handleSwap}
-        disabled={!calculation || loading}
-        className="w-full py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg font-medium transition-colors"
+        disabled={!calculation}
+        loading={loading}
+        className="w-full"
       >
-        {loading ? "Swapping..." : "Swap"}
-      </button>
+        EXECUTE SWAP
+      </TerminalButton>
     </div>
   );
 }

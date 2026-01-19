@@ -3,21 +3,195 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Terminal color palette */
+  --bg-terminal: #0a0a0a;
+  --fg-primary: #33ff00;
+  --fg-secondary: #ffb000;
+  --fg-muted: #1a4d1a;
+  --fg-error: #ff3333;
+  --fg-dim: #0d2f0d;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-radius: 0 !important;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--fg-primary);
+  background: var(--bg-terminal);
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+}
+
+/* CRT Scanline overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Text glow for primary elements */
+.glow {
+  text-shadow: 0 0 5px rgba(51, 255, 0, 0.5);
+}
+
+.glow-strong {
+  text-shadow: 0 0 10px rgba(51, 255, 0, 0.7), 0 0 20px rgba(51, 255, 0, 0.3);
+}
+
+.glow-amber {
+  text-shadow: 0 0 5px rgba(255, 176, 0, 0.5);
+}
+
+.glow-error {
+  text-shadow: 0 0 5px rgba(255, 51, 51, 0.5);
+}
+
+/* Terminal colors as utility classes */
+.text-terminal {
+  color: var(--fg-primary);
+}
+
+.text-terminal-amber {
+  color: var(--fg-secondary);
+}
+
+.text-terminal-muted {
+  color: var(--fg-muted);
+}
+
+.text-terminal-error {
+  color: var(--fg-error);
+}
+
+.bg-terminal {
+  background: var(--bg-terminal);
+}
+
+.bg-terminal-dim {
+  background: var(--fg-dim);
+}
+
+.border-terminal {
+  border-color: var(--fg-muted);
+}
+
+.border-terminal-bright {
+  border-color: var(--fg-primary);
+}
+
+/* Cursor blink animation */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* Typing animation */
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.animate-typing {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typing 2s steps(40, end);
+}
+
+/* Pulse for loading states */
+@keyframes pulse-terminal {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse-terminal {
+  animation: pulse-terminal 1.5s ease-in-out infinite;
+}
+
+/* Selection styling */
+::selection {
+  background: var(--fg-primary);
+  color: var(--bg-terminal);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-terminal);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--fg-muted);
+  border: 1px solid var(--fg-dim);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-primary);
+}
+
+/* Focus styles */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 1px solid var(--fg-primary);
+  outline-offset: 2px;
+}
+
+/* ASCII box characters - ensure they render correctly */
+.ascii-box {
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1.2;
+  white-space: pre;
+}
+
+/* Input base reset */
+input, textarea {
+  background: transparent;
+  border: none;
+  color: var(--fg-primary);
+  font-family: inherit;
+  caret-color: var(--fg-primary);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--fg-muted);
+}
+
+/* Button base reset */
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Link styling */
+a {
+  color: var(--fg-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 @layer utilities {

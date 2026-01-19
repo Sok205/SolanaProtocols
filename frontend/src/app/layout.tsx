@@ -1,21 +1,16 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SolanaProvider } from "@/components/providers/SolanaProvider";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  weight: ["400", "500", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Solana Protocol Economics",
+  title: "Solana Protocol Economics Terminal",
   description: "Learn Solana protocol economics through interactive examples",
 };
 
@@ -26,9 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-950 text-white`}
-      >
+      <body className={`${jetbrainsMono.variable} font-mono bg-terminal text-terminal`}>
         <SolanaProvider>{children}</SolanaProvider>
       </body>
     </html>
