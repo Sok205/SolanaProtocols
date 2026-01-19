@@ -127,14 +127,12 @@ export async function buildCreateTokenTransaction(
  * @param payer - PublicKey of the fee payer and mint authority
  * @param mint - PublicKey of the token mint
  * @param amount - Amount of tokens to mint (in base units)
- * @param decimals - Number of decimals (used for display, not calculation)
  */
 export async function buildMintToTransaction(
   connection: Connection,
   payer: PublicKey,
   mint: PublicKey,
-  amount: bigint,
-  decimals: number = 9
+  amount: bigint
 ): Promise<Transaction> {
   // Get or create the ATA for the payer
   const { address: ata, instruction: createAtaIx } = await getOrCreateATA(

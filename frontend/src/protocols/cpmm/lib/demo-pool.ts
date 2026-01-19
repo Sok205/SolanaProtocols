@@ -1,4 +1,4 @@
-import { Connection, PublicKey, Transaction, Keypair } from "@solana/web3.js";
+import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { BN } from "@coral-xyz/anchor";
 import {
@@ -112,8 +112,8 @@ export async function createDemoPool(
   const totalAmount = BigInt(POOL_INITIAL_AMOUNT + USER_INITIAL_AMOUNT) * BigInt(10 ** DECIMALS);
 
   const [mintToATx, mintToBTx] = await Promise.all([
-    buildMintToTransaction(connection, wallet.publicKey, mintAKeypair.publicKey, totalAmount, DECIMALS),
-    buildMintToTransaction(connection, wallet.publicKey, mintBKeypair.publicKey, totalAmount, DECIMALS),
+    buildMintToTransaction(connection, wallet.publicKey, mintAKeypair.publicKey, totalAmount),
+    buildMintToTransaction(connection, wallet.publicKey, mintBKeypair.publicKey, totalAmount),
   ]);
 
   const signedMintTxs = await wallet.signAllTransactions([mintToATx, mintToBTx]);
