@@ -11,6 +11,7 @@ import { PoolVisualization } from "../components/PoolVisualization";
 import { SwapPanel } from "../components/SwapPanel";
 import { AddLiquidityPanel } from "../components/AddLiquidityPanel";
 import { RemoveLiquidityPanel } from "../components/RemoveLiquidityPanel";
+import { FaucetPanel } from "../components/FaucetPanel";
 import { WalletButton } from "@/components/wallet/WalletButton";
 import { TerminalWindow, StatusIndicator } from "@/components/shared";
 import { formatTokenAmount } from "../lib/math";
@@ -19,7 +20,7 @@ interface Props {
   poolId: string;
 }
 
-type Tab = "swap" | "add" | "remove";
+type Tab = "swap" | "add" | "remove" | "faucet";
 
 interface TxResult {
   signature: string;
@@ -147,6 +148,7 @@ export function PoolDetail({ poolId }: Props) {
     { id: "swap", label: "--swap" },
     { id: "add", label: "--add" },
     { id: "remove", label: "--remove" },
+    { id: "faucet", label: "--faucet" },
   ];
 
   return (
@@ -234,6 +236,14 @@ export function PoolDetail({ poolId }: Props) {
                     pool={pool}
                     userLpBalance={userLpBalance}
                     onRemoveLiquidity={handleRemoveLiquidity}
+                  />
+                )}
+                {activeTab === "faucet" && (
+                  <FaucetPanel
+                    pool={pool}
+                    balanceA={balanceA}
+                    balanceB={balanceB}
+                    onMinted={fetchBalances}
                   />
                 )}
               </>

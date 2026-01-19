@@ -79,44 +79,47 @@ export function PoolExplorer() {
           </div>
         )}
 
-        {/* Pool table */}
+        {/* Pool list */}
         {!loading && pools.length > 0 && (
-          <div className="overflow-x-auto">
-            {/* Header row */}
-            <div className="grid grid-cols-[120px_1fr_1fr_100px_60px] gap-2 text-terminal-muted text-xs uppercase border-b border-terminal pb-2 mb-2 min-w-[500px]">
-              <span>POOL_ID</span>
-              <span>RESERVE_A</span>
-              <span>RESERVE_B</span>
-              <span>K_VALUE</span>
-              <span>STATUS</span>
-            </div>
+          <div className="space-y-4">
+            {pools.map((pool, index) => (
+              <Link
+                key={pool.publicKey.toBase58()}
+                href={`/protocols/cpmm/pool/${pool.publicKey.toBase58()}`}
+                className="block border border-terminal p-3 hover:bg-[#33ff00] hover:bg-opacity-10 transition-colors group"
+              >
+                {/* Pool header */}
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-terminal-muted text-xs">POOL_{index + 1}</span>
+                  <span className="text-terminal text-xs group-hover:glow">[OK]</span>
+                </div>
 
-            {/* Pool rows */}
-            <div className="space-y-1 min-w-[500px]">
-              {pools.map((pool) => (
-                <Link
-                  key={pool.publicKey.toBase58()}
-                  href={`/protocols/cpmm/pool/${pool.publicKey.toBase58()}`}
-                  className="grid grid-cols-[120px_1fr_1fr_100px_60px] gap-2 py-2 hover:bg-[#33ff00] hover:bg-opacity-10 transition-colors group hover:no-underline"
-                >
-                  <span className="text-terminal-amber text-sm truncate">
-                    {pool.publicKey.toBase58().slice(0, 8)}...
+                {/* Full Pool ID */}
+                <div className="mb-3">
+                  <span className="text-terminal-amber text-xs font-mono break-all">
+                    {pool.publicKey.toBase58()}
                   </span>
-                  <span className="text-terminal glow text-sm">
-                    {formatTokenAmount(pool.reserveA)}
-                  </span>
-                  <span className="text-terminal glow text-sm">
-                    {formatTokenAmount(pool.reserveB)}
-                  </span>
-                  <span className="text-terminal-muted text-sm truncate">
-                    {formatK(pool.reserveA, pool.reserveB)}
-                  </span>
-                  <span className="text-terminal group-hover:glow text-sm">
-                    [OK]
-                  </span>
-                </Link>
-              ))}
-            </div>
+                </div>
+
+                {/* Reserves */}
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-terminal-muted text-xs">RESERVE_A: </span>
+                    <span className="text-terminal glow">{formatTokenAmount(pool.reserveA)}</span>
+                  </div>
+                  <div>
+                    <span className="text-terminal-muted text-xs">RESERVE_B: </span>
+                    <span className="text-terminal glow">{formatTokenAmount(pool.reserveB)}</span>
+                  </div>
+                </div>
+
+                {/* K Value */}
+                <div className="mt-2 text-xs">
+                  <span className="text-terminal-muted">K = </span>
+                  <span className="text-terminal-muted">{formatK(pool.reserveA, pool.reserveB)}</span>
+                </div>
+              </Link>
+            ))}
           </div>
         )}
 
