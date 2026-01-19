@@ -22,6 +22,12 @@ export function PoolExplorer() {
           >
             Learn CPMM
           </Link>
+          <Link
+            href="/protocols/cpmm/create"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors font-semibold"
+          >
+            Create Pool
+          </Link>
           <WalletButton />
         </div>
       </div>
