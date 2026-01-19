@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer, MintTo, Burn};
 
-declare_id!("9ksBfnBknijV8Tz5ejGPL8gJUSAFfody2UoueaLHmnw8");
+declare_id!("BRN4S8XoMF9qHFm5pLNKrudr9dY2ZssXKfzpTofZvNED");
 
 // Integer square root using Babylonian method
 fn integer_sqrt_u128(n: u128) -> u64 {
